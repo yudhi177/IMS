@@ -82,7 +82,6 @@ class employeeClass:
         btn_update = Button(self.root, text="Update",command=self.update, font=("goudy old style", 15), bg="#4caf50", fg="white", cursor="hand2").place(x=620, y=305, width=110, height=28)
         btn_delete = Button(self.root, text="Delete",command=self.delete, font=("goudy old style", 15), bg="#f44336", fg="white", cursor="hand2").place(x=740, y=305, width=110, height=28)
         btn_clear = Button(self.root, text="Clear",command=self.clear, font=("goudy old style", 15), bg="#607d8b", fg="white", cursor="hand2").place(x=860, y=305, width=110, height=28)
- 
         # Employee Details Table
         emp_frame = Frame(self.root, bd=3, relief=RIDGE)
         emp_frame.place(x=0, y=350, relwidth=1, height=150)

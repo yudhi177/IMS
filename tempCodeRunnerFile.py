@@ -1,32 +1,40 @@
-def add(self):
-        con = sqlite3.connect(database=r'ims.db')
-        cur = con.cursor()
+from tkinter import *
+from PIL import Image, ImageTk
+
+
+class billClass:
+    def __init__(self, root):
+        self.root = root
+        self.root.geometry("1350x700+0+0")
+        self.root.title("Inventory Management System")
+        self.root.config(bg="white")
+
+        # ==== Title ====
         try:
-            if self.var_name.get() == "":
-                messagebox.showerror("Error", "Employee Name is required", parent=self.root)
-            else:
-                cur.execute("Select * from employee where eid=?",(self.var_emp_id.get(),))
-                row=cur.fetchone()
-                if row!= None:
-                    messagebox.showerror("Error","This Employee ID already assigned,try different",parent=self.root)
-                else:
-                    cur.execute("INSERT INTO employee (name, email, gender, contact, dob, doj, pass, utype, address, salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (
-                        self.var_emp_id.get(),
-                        self.var_name.get(),
-                        self.var_email.get(),
-                        self.var_gender.get(),
-                        self.var_contact.get(),
-                        self.var_dob.get(),
-                        self.var_doj.get(),
-                        self.var_pass.get(),
-                        self.var_utype.get(),
-                        self.txt_address.get("1.0", END),
-                        self.var_salary.get(),
-                ))
-                con.commit()
-                messagebox.showinfo("Success", "Employee added successfully", parent=self.root)
-                self.show()
-        except Exception as ex:
-            messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
-        finally:
-            con.close()
+            image = Image.open("image/Logo1.png")
+            self.icon_title = ImageTk.PhotoImage(image)
+        except FileNotFoundError:
+            print("Error: Image file not found: image/Logo1.png")
+
+        title = Label(self.root, text="Inventory Management System", font=("times new roman", 40, "bold"), bg="#010c48", fg="white", anchor="w", padx=20, image=self.icon_title, compound=LEFT).place(x=0, y=0, relwidth=1, height=70)
+
+        # ===btn_logout===
+        btn_logout = Button(self.root, text="Logout", font=("times new roman", 15, "bold"), bg="yellow", cursor="hand2").place(x=1150, y=10, height=50, width=150)
+
+        # ===clock===
+        self.lbl_clock = Label(self.root, text="welcome to Inventory Management System\t\t Date: DD-MM-YYYY\t\t Time:HH:MM:SS ", font=("times new roman", 15), bg="#4d636d", fg="white")
+        self.lbl_clock.place(x=6, y=70, relwidth=1, height=30)
+        
+        #product frame====================
+        productFrame1=Frame(self.root,bd=4,relief=RIDGE,bg="white")
+        productFrame1.place(x=10,y=110,width=410,height=550)
+        
+        ptittle=Label(productFrame1,text="All Products",font=("goudy old style",20,"bold"),bg="#262626",fg="white").pack(side=TOP,fill=X)
+        
+        productFrame2=Frame(productFrame1,bd=2,relief=RIDGE,bg="white")
+        productFrame2.place(x=2,y=42,width=398,height=90)
+        
+if __name__=="__main__":
+    root = Tk()
+    obj = billClass(root)
+    root.mainloop()
