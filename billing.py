@@ -94,9 +94,35 @@ class billClass:
         
         
         #======CALCULATOR FRAME=============
-        Cal_Frame = Frame(Cal_Cart_Frame, bd=2, relief=RIDGE, bg="white")
+        self.var_cal_input=StringVar()
+        
+        Cal_Frame = Frame(Cal_Cart_Frame, bd=11, relief=RIDGE, bg="white")
         Cal_Frame.place(x=5, y=10, width=268, height=340)
         
+        txt_cal_input=Entry(Cal_Frame,textvariable=self.var_cal_input,font=("arial",15,"bold"),width=21,bd=10,relief=GROOVE,state='readonly',justify=RIGHT)
+        txt_cal_input.grid(row=0,columnspan=4)
+        
+        btn_7=Button(Cal_Frame,text='7',font=("arial",15,"bold"),command=lambda:self.get_input(7),cursor="hand2",bd=5,width=4,pady=12).grid(row=1,column=0)
+        btn_8=Button(Cal_Frame,text='8',font=("arial",15,"bold"),command=lambda:self.get_input(8),cursor="hand2",bd=5,width=4,pady=12).grid(row=1,column=1)
+        btn_9=Button(Cal_Frame,text='9',font=("arial",15,"bold"),command=lambda:self.get_input(9),cursor="hand2",bd=5,width=4,pady=12).grid(row=1,column=2)
+        btn_sum=Button(Cal_Frame,text='+',font=("arial",15,"bold"),command=lambda:self.get_input('+'),cursor="hand2",bd=5,width=4,pady=12).grid(row=1,column=3)
+        
+        btn_4=Button(Cal_Frame,text='4',font=("arial",15,"bold"),command=lambda:self.get_input(4),cursor="hand2",bd=5,width=4,pady=12).grid(row=2,column=0)
+        btn_5=Button(Cal_Frame,text='5',font=("arial",15,"bold"),command=lambda:self.get_input(5),cursor="hand2",bd=5,width=4,pady=12).grid(row=2,column=1)
+        btn_6=Button(Cal_Frame,text='6',font=("arial",15,"bold"),command=lambda:self.get_input(6),cursor="hand2",bd=5,width=4,pady=12).grid(row=2,column=2)
+        btn_sub=Button(Cal_Frame,text='-',font=("arial",15,"bold"),command=lambda:self.get_input('-'),cursor="hand2",bd=5,width=4,pady=12).grid(row=2,column=3)
+        
+        btn_1=Button(Cal_Frame,text='1',font=("arial",15,"bold"),command=lambda:self.get_input(1),cursor="hand2",bd=5,width=4,pady=12).grid(row=3,column=0)
+        btn_2=Button(Cal_Frame,text='2',font=("arial",15,"bold"),command=lambda:self.get_input(2),cursor="hand2",bd=5,width=4,pady=12).grid(row=3,column=1)
+        btn_3=Button(Cal_Frame,text='3',font=("arial",15,"bold"),command=lambda:self.get_input(3),cursor="hand2",bd=5,width=4,pady=12).grid(row=3,column=2)
+        btn_mul=Button(Cal_Frame,text='*',font=("arial",15,"bold"),command=lambda:self.get_input('*'),cursor="hand2",bd=5,width=4,pady=12).grid(row=3,column=3)
+        
+        btn_0=Button(Cal_Frame,text='0',font=("arial",15,"bold"),command=lambda:self.get_input(0),cursor="hand2",bd=5,width=4,pady=15).grid(row=4,column=0)
+        btn_c=Button(Cal_Frame,text='c',font=("arial",15,"bold"),command=self.clear_cal,cursor="hand2",bd=5,width=4,pady=15).grid(row=4,column=1)
+        btn_eq=Button(Cal_Frame,text='=',font=("arial",15,"bold"),command=self.perform_cal,cursor="hand2",bd=5,width=4,pady=15).grid(row=4,column=2)
+        btn_div=Button(Cal_Frame,text='/',font=("arial",15,"bold"),command=lambda:self.get_input('/'),cursor="hand2",bd=5,width=4,pady=15).grid(row=4,column=3)
+        
+                       
         #======CART FRAME=============
         Cart_Frame = Frame(Cal_Cart_Frame, bd=3, relief=RIDGE)
         Cart_Frame.place(x=280, y=8, width=245, height=342)
@@ -150,8 +176,56 @@ class billClass:
         btn_clear_cart = Button(Add_CartWidgets_Frame,text="Clear",font=("times new roman",15,"bold"),bg="lightgrey",cursor="hand2").place(x=180,y=70,width=170,height=30)
         btn_add_cart = Button(Add_CartWidgets_Frame,text="Add | Update Cart",font=("times new roman",15,"bold"),bg="yellow",cursor="hand2").place(x=340,y=70,width=180,height=30)
         
+        #===========BILLING AREA =================
+        billFrame=Frame(self.root,bd=2,relief=RIDGE,bg='white')
+        billFrame.place(x=953,y=110,width=410,height=410)
+        
+        bTitle = Label(billFrame, text="Customer Bill Area", font=("goudy old style", 20, "bold"), bg="#262626", fg="white").pack(side=TOP, fill=X)
+        scrolly=Scrollbar(billFrame,orient=VERTICAL)
+        scrolly.pack(side=RIGHT,fill=Y)
+        
+        self.txt_bill_area=Text(billFrame,yscrollcommand=scrolly.set)
+        self.txt_bill_area.pack(fill=BOTH,expand=1)
+        scrolly.config(command=self.txt_bill_area.yview)
+        
+        #================BILLING BUTTONS==============
+        billMenuFrame=Frame(self.root,bd=2,relief=RIDGE,bg='white')
+        billMenuFrame.place(x=953,y=520,width=410,height=140)
+        
+        self.lb1_amnt=Label(billMenuFrame,text='Bill Amount\n[0]', font=("goudy old style",15,"bold"),bg="#3f51b5",fg="white")
+        self.lb1_amnt.place(x=2,y=5,width=120,height=70)
+        
+        self.lb1_discount=Label(billMenuFrame,text='Discount\n[5%]', font=("goudy old style",15,"bold"),bg="#8bc34a",fg="white")
+        self.lb1_discount.place(x=124,y=5,width=120,height=70)
+        
+        self.lb1_net_pay=Label(billMenuFrame,text='Net Pay\n[0]', font=("goudy old style",15,"bold"),bg="#607d8b",fg="white")
+        self.lb1_net_pay.place(x=246,y=5,width=160,height=70)
+        
+        btn_print=Button(billMenuFrame,text='Print',cursor="hand2", font=("goudy old style",15,"bold"),bg="light green",fg="white")
+        btn_print.place(x=2,y=80,width=120,height=50)
+        
+        btn_clear_all=Button(billMenuFrame,text='Clear All',cursor="hand2", font=("goudy old style",15,"bold"),bg="grey",fg="white")
+        btn_clear_all.place(x=124,y=80,width=120,height=70)
+        
+        btn_generate=Button(billMenuFrame,text='Generate Bill',cursor="hand2", font=("goudy old style",15,"bold"),bg="#009688",fg="white")
+        btn_generate.place(x=246,y=80,width=160,height=70)
+        
+        #==============footer=======================
+        footer=Label(self.root,text="IMS-Inventory Management System | Developed BY Group 6\nFor Any Techbical Issue Contact: 8930xxxxxx",font=("times new roman",11),bg="#4d636d",fg="white",bd=0,cursor="hand2").pack(side=BOTTOM,fill=X)
         
         
+        
+#=================ALL FUNCTIONS===================
+    def get_input(self,num):
+        xnum=self.var_cal_input.get()+str(num)
+        self.var_cal_input.set(xnum)        
+    
+    def clear_cal(self):
+        self.var_cal_input.set('')
+        
+    def perform_cal(self):
+        result=self.var_cal_input.get()
+        self.var_cal_input.set(eval(result))   
         
 if __name__ == "__main__":
     root = Tk()
