@@ -131,7 +131,8 @@ class billClass:
         #======CART FRAME=============
         Cart_Frame = Frame(Cal_Cart_Frame, bd=3, relief=RIDGE)
         Cart_Frame.place(x=280, y=8, width=245, height=342)
-        cartTitle = Label(Cart_Frame, text="Cart \t Total Product: [0]", font=("goudy old style", 15), bg="lightgrey").pack(side=TOP, fill=X)
+        self.cartTitle = Label(Cart_Frame, text="Cart \t Total Product: [0]", font=("goudy old style", 15), bg="lightgrey")
+        self.cartTitle.pack(side=TOP, fill=X)
         
         scrolly = Scrollbar(Cart_Frame, orient=VERTICAL)
         scrollx = Scrollbar(Cart_Frame, orient=HORIZONTAL)
@@ -236,7 +237,7 @@ class billClass:
         con=sqlite3.connect(database="ims.db")
         cur=con.cursor()
         try:
-            cur.execute("select pid,name,price,qty,status from product")
+            cur.execute("select pid,name,price,qty,status from product where status='Active'")
             rows=cur.fetchall()
             self.product_Table.delete(*self.product_Table.get_children())   
             for row in rows :
@@ -252,7 +253,7 @@ class billClass:
                 messagebox.showerror("Error","Search input should be required",parent=self.root)   
             else:
                 search_term = "%" + self.var_searchtxt.get() + "%"
-                cur.execute("select pid,name,price,qty,status from Product WHERE name LIKE '%"+self.var_search.get()+"%'")
+                cur.execute("select pid,name,price,qty,status from Product WHERE name LIKE '%"+self.var_search.get()+"%' and status='Active'")
                 rows=cur.fetchall()
                 if len(rows)!=0:
                     self.product_Table.delete(*self.product_Table.get_children())   
@@ -273,11 +274,56 @@ class billClass:
         self.lb1_inStock.config(text=f"In Stock [{str(row[3])}]")
         
     def add_update_cart(self):
-        if self.var_qty.get()=='':
+        if self.var_pid.get()=='':
+            messagebox.showerror('Error',"Please select product from the list" ,parent=self.root)
+        elif self.var_qty.get()=='':
             messagebox.showerror('Error',"Quantity is Required",parent=self.root)
         else:
             price_cal=float(int(self.var_qty.get())*float(self.var_price.get()))
-            print(price_cal)
+            cart_data=[self.var_pid.get(),self.var_pname.get(),price_cal,self.var_qty.get()]
+            
+            #======UPDATE CART===========
+            present='NO'
+            index_=0
+            for row in self.cart_list:
+                if self.var_pid.get()==row[0]:
+                    present='YES'
+                    break
+                index_+=1
+            if present=='YES':
+                op=messagebox.askyesno('Confirm',"Product already present\nDo you want to update | Remove from the Cart List")    
+                if op==True:
+                    if self.var_qty.get()=='0':
+                        self.cart_list.pop(index_)
+                    else:
+                        self.cart_list[index_][2]=price_cal
+                        self.cart_list[index_][3]=self.var_qty.get()
+            else:
+                self.cart_list.append(cart_data)
+            
+            self.show_cart()   
+            self.bill_updates() 
+    
+    def bill_updates(self):
+        bill_amnt=0
+        net_pay=0
+        for row in self.cart_list:
+            bill_amnt=bill_amnt+float(row[2])
+            
+        net_pay=bill_amnt-((bill_amnt*5)/100)
+
+        self.lb1_amnt.config(text=f'Bill Amount\nRs. {str(bill_amnt)}')
+        self.lb1_net_pay.config(text=f'Net Pay\nRs. {str(net_pay)}')
+        self.cartTitle.config(text=f"Cart \t Total product: [{str(len(self.cart_list))}]")
+        
+    def show_cart(self):
+        try:
+            self.cartTable.delete(*self.cartTable.get_children())   
+            for row in self.cart_list :
+                self.cartTable.insert('',END,values=row)
+        except Exception as ex:
+            messagebox.showerror("Error",f"Error due to :{str(ex)}",parent=self.root)
+                                                        
             
 if __name__ == "__main__":
     root = Tk()
