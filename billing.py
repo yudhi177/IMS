@@ -2,6 +2,7 @@ from tkinter import *
 from PIL import Image, ImageTk
 from tkinter import ttk,messagebox
 import sqlite3
+import time
 
 class billClass:
     def __init__(self, root):
@@ -137,7 +138,7 @@ class billClass:
         scrolly = Scrollbar(Cart_Frame, orient=VERTICAL)
         scrollx = Scrollbar(Cart_Frame, orient=HORIZONTAL)
 
-        self.cartTable = ttk.Treeview(Cart_Frame, columns=("pid", "name", "price", "qty","status"), yscrollcommand=scrolly.set, xscrollcommand=scrollx.set)
+        self.cartTable = ttk.Treeview(Cart_Frame, columns=("pid", "name", "price", "qty"), yscrollcommand=scrolly.set, xscrollcommand=scrollx.set)
         scrollx.pack(side=BOTTOM, fill=X)
         scrolly.pack(side=RIGHT, fill=Y)
         scrollx.config(command=self.cartTable.xview)
@@ -147,16 +148,14 @@ class billClass:
         self.cartTable.heading("name", text="Name")
         self.cartTable.heading("price", text="Price")
         self.cartTable.heading("qty", text="QTY")
-        self.cartTable.heading("status", text="Status")
         self.cartTable["show"] = "headings"
 
-        self.cartTable.column("pid", width=40)
-        self.cartTable.column("name", width=100)
+        self.cartTable.column("pid", width=60)
+        self.cartTable.column("name", width=80)
         self.cartTable.column("price", width=90)
         self.cartTable.column("qty", width=40)
-        self.cartTable.column("status", width=90)
         self.cartTable.pack(fill=BOTH, expand=1)
-        self.cartTable.bind("<ButtonRelease-1>",self.get_data)
+        self.cartTable.bind("<ButtonRelease-1>",self.get_data_cart)
         
         #=========ADD CART WIDGETS FRAME=============
         self.var_pid=StringVar()
@@ -207,31 +206,34 @@ class billClass:
         self.lb1_net_pay=Label(billMenuFrame,text='Net Pay\n[0]', font=("goudy old style",15,"bold"),bg="#607d8b",fg="white")
         self.lb1_net_pay.place(x=246,y=5,width=160,height=70)
         
-        btn_print=Button(billMenuFrame,text='Print',cursor="hand2", font=("goudy old style",15,"bold"),bg="light green",fg="white")
-        btn_print.place(x=2,y=80,width=120,height=50)
+        btn_print=Button(billMenuFrame,text='Print',cursor="hand2", font=("goudy old style",15,"bold"),bg="pink",fg="white")
+        btn_print.place(x=2,y=80,width=120,height=70)
         
         btn_clear_all=Button(billMenuFrame,text='Clear All',cursor="hand2", font=("goudy old style",15,"bold"),bg="grey",fg="white")
         btn_clear_all.place(x=124,y=80,width=120,height=70)
         
-        btn_generate=Button(billMenuFrame,text='Generate Bill',cursor="hand2", font=("goudy old style",15,"bold"),bg="#009688",fg="white")
+        btn_generate=Button(billMenuFrame,text='Generate Bill',cursor="hand2",command=self.generate_bill, font=("goudy old style",15,"bold"),bg="#009688",fg="white")
         btn_generate.place(x=246,y=80,width=160,height=70)
         
         #==============footer=======================
         footer=Label(self.root,text="IMS-Inventory Management System | Developed BY Group 6\nFor Any Techbical Issue Contact: 8930xxxxxx",font=("times new roman",11),bg="#4d636d",fg="white",bd=0,cursor="hand2").pack(side=BOTTOM,fill=X)
         
         self.show()
-        
+    
 #=================ALL FUNCTIONS===================
     def get_input(self,num):
         xnum=self.var_cal_input.get()+str(num)
-        self.var_cal_input.set(xnum)        
+        self.var_cal_input.set(xnum)    
+            
     
     def clear_cal(self):
         self.var_cal_input.set('')
         
+        
     def perform_cal(self):
         result=self.var_cal_input.get()
         self.var_cal_input.set(eval(result)) 
+        
     
     def show(self):
         con=sqlite3.connect(database="ims.db")
@@ -244,6 +246,7 @@ class billClass:
                 self.product_Table.insert('',END,values=row)
         except Exception as ex:
             messagebox.showerror("Error",f"Error due to :{str(ex)}",parent=self.root)
+  
   
     def search(self):
         con=sqlite3.connect(database="ims.db")
@@ -264,6 +267,7 @@ class billClass:
         except Exception as ex:
             messagebox.showerror("Error",f"Error due to :{str(ex)}",parent=self.root)
     
+    
     def get_data(self, ev):
         f = self.product_Table.focus()
         content = (self.product_Table.item(f))
@@ -272,16 +276,36 @@ class billClass:
         self.var_pname.set(row[1])
         self.var_price.set(row[2])
         self.lb1_inStock.config(text=f"In Stock [{str(row[3])}]")
-        
+        self.var_stock.set(row[3])
+        self.var_qty.set('1')
+     
+     
+    def get_data_cart(self, ev):
+        f = self.cartTable.focus()
+        content = (self.cartTable.item(f))
+        row = content["values"]
+        # pid,name,price,qty,stock
+        self.var_pid.set(row[0])
+        self.var_pname.set(row[1])
+        self.var_price.set(row[2])
+        self.var_qty.set(row[3])
+        self.lb1_inStock.config(text=f"In Stock [{str(row[4])}]")
+        self.var_stock.set(row[4])
+                
+                
     def add_update_cart(self):
         if self.var_pid.get()=='':
             messagebox.showerror('Error',"Please select product from the list" ,parent=self.root)
         elif self.var_qty.get()=='':
             messagebox.showerror('Error',"Quantity is Required",parent=self.root)
+        elif int(self.var_qty.get()) > int(self.var_stock.get()):
+            messagebox.showerror('Error',"Inavlid Quantity",parent=self.root)
         else:
-            price_cal=float(int(self.var_qty.get())*float(self.var_price.get()))
-            cart_data=[self.var_pid.get(),self.var_pname.get(),price_cal,self.var_qty.get()]
-            
+            # price_cal=float(int(self.var_qty.get())*float(self.var_price.get()))
+            # cart_data=[self.var_pid.get(),self.var_pname.get(),price_cal,self.var_qty.get()]
+            price_cal=self.var_price.get()
+            # pid,name,price,qty,stock
+            cart_data=[self.var_pid.get(),self.var_pname.get(),price_cal,self.var_qty.get(),self.var_stock.get()]
             #======UPDATE CART===========
             present='NO'
             index_=0
@@ -304,17 +328,20 @@ class billClass:
             self.show_cart()   
             self.bill_updates() 
     
+    
     def bill_updates(self):
-        bill_amnt=0
-        net_pay=0
+        self.bill_amnt=0
+        self.net_pay=0
+        self.discount=0
         for row in self.cart_list:
-            bill_amnt=bill_amnt+float(row[2])
-            
-        net_pay=bill_amnt-((bill_amnt*5)/100)
-
-        self.lb1_amnt.config(text=f'Bill Amount\nRs. {str(bill_amnt)}')
-        self.lb1_net_pay.config(text=f'Net Pay\nRs. {str(net_pay)}')
+            # pid, name,price,qty,stock
+            self.bill_amnt=self.bill_amnt+(float(row[2])*int(row[3]))
+        self.discount=((self.bill_amnt*5)/100)
+        self.net_pay=self.bill_amnt-self.discount
+        self.lb1_amnt.config(text=f'Bill Amount\nRs. {str(self.bill_amnt)}')
+        self.lb1_net_pay.config(text=f'Net Pay\nRs. {str(self.net_pay)}')
         self.cartTitle.config(text=f"Cart \t Total product: [{str(len(self.cart_list))}]")
+        
         
     def show_cart(self):
         try:
@@ -323,8 +350,61 @@ class billClass:
                 self.cartTable.insert('',END,values=row)
         except Exception as ex:
             messagebox.showerror("Error",f"Error due to :{str(ex)}",parent=self.root)
-                                                        
+     
+                              
+    def generate_bill(self):
+        if self.var_cname.get()=='' or self.var_contact.get()=='':
+            messagebox.showerror("Error",f"Customer Details are Required",parent=self.root)
+        elif len(self.cart_list)==0:
+            messagebox.showerror("Error",f"Please Add product to cart",parent=self.root)
+        else:
+            #=========Bill Top============
+            self.bill_top()
+            #=========Bill Middle============
+            self.bill_middle()
+            #=========Bill Bottom============
+            self.bill_bottom()
+      
+                                                            
+    def bill_top(self):
+        invoice=int(time.strftime("%H%M%S"))+int(time.strftime("%d%m%Y"))
+        bill_top_temp=f'''
+\t\tXYZ-Inventory
+\t Phone No. 98725***** , Delhi-125001
+{str("="*47)}
+ Customer Name: {self.var_cname.get()}
+ Ph no. :{self.var_contact.get()}
+ Bill No. {str(invoice)}\t\t\tDate: {str(time.strftime("%d/%m/%Y"))}
+{str("="*47)}
+ Product Name\t\t\tQTY\tPrice
+{str("="*47)}
+        '''
+        self.txt_bill_area.delete('1.0',END)
+        self.txt_bill_area.insert('1.0',bill_top_temp)
+        
+        
+    def bill_bottom(self):
+        bill_bottom_temp=f'''
+{str("="*47)}
+ Bill Amou7nt\t\t\t\tRs. {self.bill_amnt}
+ Discount\t\t\t\tRs. {self.discount}
+ Net Pay\t\t\t\tRs. {self.net_pay}
+{str("="*47)}\n
+        '''
+        self.txt_bill_area.insert(END,bill_bottom_temp)
+    
+    
+    def bill_middle(self):
+        for row in self.cart_list:
+            #pid ,name,price,qty,stock
+            name=row[1]
+            qty=row[3]
+            price=float(row[2])*int(row[3])
+            price=str(price)
+            self.txt_bill_area.insert(END,"\n "+name+"\t\t\t"+qty+"\tRs."+price)
             
+            
+   
 if __name__ == "__main__":
     root = Tk()
     obj = billClass(root)
