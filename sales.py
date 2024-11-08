@@ -42,7 +42,7 @@ class salesClass:
         lbl_title2 = Label(bill_frame, text="Customer Bill Area", font=("goudy old style", 20), bg="orange").pack(side=TOP, fill=X)
         
         scrolly2 = Scrollbar(bill_frame, orient=VERTICAL)
-        self.area_list = Text(bill_frame, font=("goudy old style", 15), bg="lightyellow", yscrollcommand=scrolly2.set)
+        self.area_list = Text(bill_frame, bg="lightyellow", yscrollcommand=scrolly2.set)
         scrolly2.pack(side=RIGHT, fill=Y)
         scrolly2.config(command=self.area_list.yview)
         self.area_list.pack(fill=BOTH, expand=1)

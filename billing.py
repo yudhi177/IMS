@@ -178,7 +178,7 @@ class billClass:
         self.lb1_inStock = Label(Add_CartWidgets_Frame,text="In Stock ",font=("times new roman",15),bg="white")
         self.lb1_inStock.place(x=5,y=70)
         
-        btn_clear_cart = Button(Add_CartWidgets_Frame,text="Clear",font=("times new roman",15,"bold"),bg="lightgrey",cursor="hand2").place(x=180,y=70,width=170,height=30)
+        btn_clear_cart = Button(Add_CartWidgets_Frame,text="Clear",command=self.clear_cart,font=("times new roman",15,"bold"),bg="lightgrey",cursor="hand2").place(x=180,y=70,width=170,height=30)
         btn_add_cart = Button(Add_CartWidgets_Frame,text="Add | Update Cart",command=self.add_update_cart,font=("times new roman",15,"bold"),bg="yellow",cursor="hand2").place(x=340,y=70,width=180,height=30)
         
         #===========BILLING AREA =================
@@ -209,7 +209,7 @@ class billClass:
         btn_print=Button(billMenuFrame,text='Print',cursor="hand2", font=("goudy old style",15,"bold"),bg="pink",fg="white")
         btn_print.place(x=2,y=80,width=120,height=70)
         
-        btn_clear_all=Button(billMenuFrame,text='Clear All',cursor="hand2", font=("goudy old style",15,"bold"),bg="grey",fg="white")
+        btn_clear_all=Button(billMenuFrame,text='Clear All',command=self.clear_all,cursor="hand2", font=("goudy old style",15,"bold"),bg="grey",fg="white")
         btn_clear_all.place(x=124,y=80,width=120,height=70)
         
         btn_generate=Button(billMenuFrame,text='Generate Bill',cursor="hand2",command=self.generate_bill, font=("goudy old style",15,"bold"),bg="#009688",fg="white")
@@ -219,6 +219,7 @@ class billClass:
         footer=Label(self.root,text="IMS-Inventory Management System | Developed BY Group 6\nFor Any Techbical Issue Contact: 8930xxxxxx",font=("times new roman",11),bg="#4d636d",fg="white",bd=0,cursor="hand2").pack(side=BOTTOM,fill=X)
         
         self.show()
+        self.update_date_time()
     
 #=================ALL FUNCTIONS===================
     def get_input(self,num):
@@ -350,8 +351,8 @@ class billClass:
                 self.cartTable.insert('',END,values=row)
         except Exception as ex:
             messagebox.showerror("Error",f"Error due to :{str(ex)}",parent=self.root)
-     
-                              
+    
+            
     def generate_bill(self):
         if self.var_cname.get()=='' or self.var_contact.get()=='':
             messagebox.showerror("Error",f"Customer Details are Required",parent=self.root)
@@ -364,17 +365,21 @@ class billClass:
             self.bill_middle()
             #=========Bill Bottom============
             self.bill_bottom()
-      
+            
+            fp = open(f"bill/{str(self.invoice)}.txt", "w")
+            fp.write(self.txt_bill_area.get('1.0',END))
+            fp.close()
+            messagebox.showinfo('Saved',"Bill has been generated/Saved in backend",parent=self.root)
                                                             
     def bill_top(self):
-        invoice=int(time.strftime("%H%M%S"))+int(time.strftime("%d%m%Y"))
+        self.invoice=int(time.strftime("%H%M%S"))+int(time.strftime("%d%m%Y"))
         bill_top_temp=f'''
 \t\tXYZ-Inventory
 \t Phone No. 98725***** , Delhi-125001
 {str("="*47)}
  Customer Name: {self.var_cname.get()}
  Ph no. :{self.var_contact.get()}
- Bill No. {str(invoice)}\t\t\tDate: {str(time.strftime("%d/%m/%Y"))}
+ Bill No. {str(self.invoice)}\t\t\tDate: {str(time.strftime("%d/%m/%Y"))}
 {str("="*47)}
  Product Name\t\t\tQTY\tPrice
 {str("="*47)}
@@ -395,16 +400,57 @@ class billClass:
     
     
     def bill_middle(self):
-        for row in self.cart_list:
-            #pid ,name,price,qty,stock
-            name=row[1]
-            qty=row[3]
-            price=float(row[2])*int(row[3])
-            price=str(price)
-            self.txt_bill_area.insert(END,"\n "+name+"\t\t\t"+qty+"\tRs."+price)
+        con=sqlite3.connect(database="ims.db")
+        cur=con.cursor()
+        try:
+            for row in self.cart_list:
+                #pid ,name,price,qty,stock
+                pid=row[0]
+                name=row[1]
+                qty=int(row[4])-int(row[3])
+                if int(row[3])==int(row[4]):
+                    status='Inactive'
+                if int(row[3])!=int(row[4]):
+                    status='Active'
+                price=float(row[2])*int(row[3])
+                price=str(price)
+                self.txt_bill_area.insert(END,"\n "+name+"\t\t\t"+row[3]+"\tRs."+price)
+                cur.execute('Update product set qty=?,status=? where pid=?',(
+                    qty,
+                    status,
+                    pid
+                ))
+                con.commit()
+                con.close()
+                self.show()
+        except Exception as ex:
+            messagebox.showerror("Error",f"Error due to :{str(ex)}",parent=self.root)
             
-            
-   
+    def clear_cart(self):
+        self.var_pid.set('')
+        self.var_pname.set('')
+        self.var_price.set('')
+        self.var_qty.set('')
+        self.lb1_inStock.config(text=f"In Stock")
+        self.var_stock.set('')
+        
+    def clear_all(self):
+        del self.cart_list[:]
+        self.var_cname.set('')
+        self.var_contact.set('')
+        self.txt_bill_area.delete('1.0',END)
+        self.cartTitle.config(text=f"cart \t Total Product: [0]")
+        self.var_search.set('')
+        self.clear_cart()
+        self.show()
+        self.show_cart()
+        
+    def update_date_time(self):
+        time_=time.strftime("%I:%M:%S")
+        date_=time.strftime("%d-%m-%Y")
+        self.lbl_clock.config(text=F"welcome to Inventory Management System\t\t Date: {str(date_)}\t\t Time: {str(time_)} ")
+        self.lbl_clock.after(200,self.update_date_time)
+        
 if __name__ == "__main__":
     root = Tk()
     obj = billClass(root)
