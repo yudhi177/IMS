@@ -27,7 +27,7 @@ class IMS:
         title = Label(self.root, text="Inventory Management System", font=("times new roman", 40, "bold"), bg="#010c48", fg="white", anchor="w", padx=20, image=self.icon_title, compound=LEFT).place(x=0, y=0, relwidth=1, height=70)
 
         # ===btn_logout===
-        btn_logout = Button(self.root, text="Logout", font=("times new roman", 15, "bold"), bg="yellow", cursor="hand2").place(x=1150, y=10, height=50, width=150)
+        btn_logout = Button(self.root, text="Logout",command=self.logout, font=("times new roman", 15, "bold"), bg="yellow", cursor="hand2").place(x=1150, y=10, height=50, width=150)
 
         # ===clock===
         self.lbl_clock = Label(self.root, text="welcome to Inventory Management System\t\t Date: DD-MM-YYYY\t\t Time:HH:MM:SS ", font=("times new roman", 15), bg="#4d636d", fg="white")
@@ -118,7 +118,7 @@ class IMS:
             employee=cur.fetchall()
             self.lbl_employee.config(text=f"Total Employees\n [{str(len(employee))}]")
             bill=len(os.listdir('bill'))
-            self.lbl_sales.config(text=f'Total Sales[{str(bill)}]')
+            self.lbl_sales.config(text=f'Total Sales\n[{str(bill)}]')
             
             time_=time.strftime("%I:%M:%S")
             date_=time.strftime("%d-%m-%Y")
@@ -128,7 +128,11 @@ class IMS:
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
         finally:
-            con.close()       
+            con.close()
+            
+    def logout(self):
+            self.root.destroy()
+            os.system("python login.py")
 if __name__=="__main__":
     root = Tk()
     obj = IMS(root)
