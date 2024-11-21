@@ -1,2 +1,2 @@
-email ='yudhishtharbhadu3@gmail.com'
-pass_='Yudhi@123'
+email ='yudhishthar2005@gmail.com'
+pass_='eisg dwfl behu vijr'
