@@ -250,8 +250,6 @@ class billClass:
                 self.product_Table.insert('',END,values=row)
         except Exception as ex:
             messagebox.showerror("Error",f"Error due to :{str(ex)}",parent=self.root)
-  
-  
     def search(self):
         con=sqlite3.connect(database="ims.db")
         cur=con.cursor()
@@ -282,8 +280,6 @@ class billClass:
         self.lb1_inStock.config(text=f"In Stock [{str(row[3])}]")
         self.var_stock.set(row[3])
         self.var_qty.set('1')
-     
-     
     def get_data_cart(self, ev):
         f = self.cartTable.focus()
         content = (self.cartTable.item(f))
