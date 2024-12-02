@@ -2,9 +2,9 @@ from tkinter import *
 from PIL import Image, ImageTk
 from tkinter import ttk,messagebox
 import sqlite3
-import time
+import time 
 import os 
-import tempfile
+import tempfile 
 
 class billClass:
     def __init__(self, root):
@@ -250,6 +250,8 @@ class billClass:
                 self.product_Table.insert('',END,values=row)
         except Exception as ex:
             messagebox.showerror("Error",f"Error due to :{str(ex)}",parent=self.root)
+  
+  
     def search(self):
         con=sqlite3.connect(database="ims.db")
         cur=con.cursor()
@@ -257,7 +259,7 @@ class billClass:
             if self.var_search.get()=="":
                 messagebox.showerror("Error","Search input should be required",parent=self.root)   
             else:
-                search_term = "%" + self.var_searchtxt.get() + "%"
+                search_term = "%" + self.var_search.get() + "%"
                 cur.execute("select pid,name,price,qty,status from Product WHERE name LIKE '%"+self.var_search.get()+"%' and status='Active'")
                 rows=cur.fetchall()
                 if len(rows)!=0:
@@ -280,6 +282,8 @@ class billClass:
         self.lb1_inStock.config(text=f"In Stock [{str(row[3])}]")
         self.var_stock.set(row[3])
         self.var_qty.set('1')
+     
+     
     def get_data_cart(self, ev):
         f = self.cartTable.focus()
         content = (self.cartTable.item(f))
